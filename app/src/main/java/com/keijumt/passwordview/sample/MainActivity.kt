@@ -20,7 +20,7 @@ import kotlinx.android.synthetic.main.activity_main.text_d
 class MainActivity : AppCompatActivity() {
 
     companion object {
-        private const val CORRECT_PASSWORD = "1234"
+        private const val CORRECT_PASSWORD = "123456"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,14 +30,14 @@ class MainActivity : AppCompatActivity() {
         password_view.setListener(object : ActionListener {
             override fun onCompleteInput(inputText: String) {
                 if (CORRECT_PASSWORD == inputText) {
-                    password_view.correctAnimation()
+//                    password_view.correctAnimation()
                 } else {
-                    password_view.incorrectAnimation()
+//                    password_view.incorrectAnimation()
                 }
             }
 
             override fun onEndJudgeAnimation() {
-                password_view.reset()
+//                password_view.reset()
             }
         })
 
@@ -46,8 +46,14 @@ class MainActivity : AppCompatActivity() {
         text_2.setOnClickListener { password_view.appendInputText((it as TextView).text.toString()) }
         text_3.setOnClickListener { password_view.appendInputText((it as TextView).text.toString()) }
         text_4.setOnClickListener { password_view.appendInputText((it as TextView).text.toString()) }
-        text_5.setOnClickListener { password_view.appendInputText((it as TextView).text.toString()) }
-        text_6.setOnClickListener { password_view.appendInputText((it as TextView).text.toString()) }
+        text_5.setOnClickListener {
+            password_view.appendInputText((it as TextView).text.toString())
+            password_view.setTextMode(true)
+        }
+        text_6.setOnClickListener {
+            password_view.appendInputText((it as TextView).text.toString())
+            password_view.setTextMode(false)
+        }
         text_7.setOnClickListener { password_view.appendInputText((it as TextView).text.toString()) }
         text_8.setOnClickListener { password_view.appendInputText((it as TextView).text.toString()) }
         text_9.setOnClickListener { password_view.appendInputText((it as TextView).text.toString()) }

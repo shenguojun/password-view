@@ -25,6 +25,9 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Paint.ANTI_ALIAS_FLAG
+import android.graphics.Paint.FAKE_BOLD_TEXT_FLAG
+import android.graphics.Rect
+import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.View
 import androidx.interpolator.view.animation.FastOutLinearInInterpolator
@@ -51,6 +54,11 @@ internal class CircleView @JvmOverloads constructor(
         style = Paint.Style.FILL_AND_STROKE
     }
 
+    private val textPaint = TextPaint(FAKE_BOLD_TEXT_FLAG or ANTI_ALIAS_FLAG).apply {
+        textSize = 50f
+        color = Color.BLACK
+    }
+
     private var radius = 16f
 
     private var animator: ValueAnimator? = null
@@ -63,10 +71,16 @@ internal class CircleView @JvmOverloads constructor(
             postInvalidateOnAnimation()
         }
 
+    private var isTextMode = false
+
+    var text: String? = null
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val textWidth = textPaint.measureText("0").toInt()
+        val textHeight = (Math.abs(textPaint.ascent()) + textPaint.descent()).toInt()
         val width = ((radius * 2) + (outLinePaint.strokeWidth)).toInt()
         val height = ((radius * 2) + (outLinePaint.strokeWidth)).toInt()
-        setMeasuredDimension(width, height)
+        setMeasuredDimension(maxOf(width, textWidth), maxOf(height, textHeight))
     }
 
     @SuppressLint("DrawAllocation")
@@ -74,32 +88,38 @@ internal class CircleView @JvmOverloads constructor(
 
         val halfOutLineStrokeWidth = outLinePaint.strokeWidth / 2
 
-        // fill circle
-        canvas.drawCircle(
-            radius + halfOutLineStrokeWidth,
-            radius + halfOutLineStrokeWidth,
-            lerp(radius - halfOutLineStrokeWidth, 0f, progress),
-            fillCirclePaint
-        )
+        if (!isTextMode || text == null) {
+            // fill circle
+            canvas.drawCircle(
+                width.toFloat() / 2,
+                height.toFloat() / 2,
+                lerp(radius - halfOutLineStrokeWidth, 0f, progress),
+                fillCirclePaint
+            )
 
-        // outline circle
-        canvas.drawCircle(
-            radius + halfOutLineStrokeWidth,
-            radius + halfOutLineStrokeWidth,
-            lerp(radius, 0f, progress),
-            outLinePaint
-        )
+            // outline circle
+            canvas.drawCircle(
+                width.toFloat() / 2,
+                height.toFloat() / 2,
+                lerp(radius, 0f, progress),
+                outLinePaint
+            )
 
-        // fill and stroke circle
-        canvas.drawCircle(
-            radius + halfOutLineStrokeWidth,
-            radius + halfOutLineStrokeWidth,
-            lerp(0f, radius + halfOutLineStrokeWidth, progress),
-            fillAndStrokeCirclePaint
-        )
+            // fill and stroke circle
+            canvas.drawCircle(
+                width.toFloat() / 2,
+                height.toFloat() / 2,
+                lerp(0f, radius + halfOutLineStrokeWidth, progress),
+                fillAndStrokeCirclePaint
+            )
+        } else {
+            val baseX = (width / 2 - textPaint.measureText(text) / 2)
+            val baseY = (height - textPaint.descent())
+            canvas.drawText(text!!, baseX, baseY, textPaint)
+        }
     }
 
-    fun animateAndInvoke(onEnd: (() -> Unit)? = null) {
+    fun animateAndInvoke(onEnd: ((CircleView) -> Unit)? = null) {
         if (animator != null) {
             return
         }
@@ -113,7 +133,7 @@ internal class CircleView @JvmOverloads constructor(
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator?) {
                     animator = null
-                    onEnd?.invoke()
+                    onEnd?.invoke(this@CircleView)
                 }
             })
             interpolator = FastOutLinearInInterpolator()
@@ -123,6 +143,21 @@ internal class CircleView @JvmOverloads constructor(
 
     fun setRadius(radius: Float) {
         this.radius = radius
+        invalidate()
+    }
+
+    fun setTextColor(color: Int) {
+        textPaint.color = color
+        invalidate()
+    }
+
+    fun setTextMode(isTextMode: Boolean) {
+        this.isTextMode = isTextMode
+        invalidate()
+    }
+
+    fun setTextSize(textSize: Int) {
+        textPaint.textSize = textSize.toFloat()
         invalidate()
     }
 

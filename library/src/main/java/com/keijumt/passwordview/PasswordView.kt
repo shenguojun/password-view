@@ -42,36 +42,66 @@ class PasswordView @JvmOverloads constructor(
         private const val DEFAULT_OUTLINE_COLOR = Color.GRAY
         private const val DEFAULT_CORRECT_COLOR = Color.GREEN
         private const val DEFAULT_INCORRECT_COLOR = Color.RED
+        private const val DEFAULT_COMPLETE_TEXT_COLOR = Color.BLUE
+        private const val DEFAULT_TEXT_COLOR = Color.BLACK
+        private const val DEFAULT_TEXT_MODE = false
+        private const val DEFAULT_TEXT_SIZE = 60
         private const val DEFAULT_CORRECT_ANIMATION_DURATION = 150
         private const val DEFAULT_INCORRECT_ANIMATION_DURATION = 400
         private const val DEFAULT_COLOR_CHANGE_ANIMATION_DURATION = 200
         private const val DEFAULT_INPUT_AND_REMOVE_ANIMATION_DURATION = 200
-        private const val DEFAULT_CORRECT_TOP = 40f
+        private const val DEFAULT_CORRECT_TOP = 15f
         private const val DEFAULT_CORRECT_BOTTOM = 15f
         private const val DEFAULT_INCORRECT_MAX_WIDTH = 40f
         private const val DEFAULT_OUTLINE_STROKE_WIDTH = 4f
     }
 
     private val array = context.obtainStyledAttributes(attrs, R.styleable.PasswordView)
-    var passwordCount = array.getInteger(R.styleable.PasswordView_password_count, DEFAULT_CIRCLE_COUNT)
+    var passwordCount =
+        array.getInteger(R.styleable.PasswordView_password_count, DEFAULT_CIRCLE_COUNT)
         set(value) {
             field = value
             addCircleView(passwordCount)
         }
-    private val radius = array.getDimension(R.styleable.PasswordView_password_radius, DEFAULT_RADIUS)
+    private val radius =
+        array.getDimension(R.styleable.PasswordView_password_radius, DEFAULT_RADIUS)
     private val betweenMargin =
-        array.getDimensionPixelOffset(R.styleable.PasswordView_password_between_margin, DEFAULT_BETWEEN_MARGIN)
-    private val inputColor = array.getColor(R.styleable.PasswordView_password_input_color, DEFAULT_INPUT_COLOR)
-    private val notInputColor = array.getColor(R.styleable.PasswordView_password_input_color, DEFAULT_NOT_INPUT_COLOR)
-    private val outlineColor = array.getColor(R.styleable.PasswordView_password_outline_color, DEFAULT_OUTLINE_COLOR)
-    private val correctColor = array.getColor(R.styleable.PasswordView_password_correct_color, DEFAULT_CORRECT_COLOR)
+        array.getDimensionPixelOffset(
+            R.styleable.PasswordView_password_between_margin,
+            DEFAULT_BETWEEN_MARGIN
+        )
+    private val inputColor =
+        array.getColor(R.styleable.PasswordView_password_input_color, DEFAULT_INPUT_COLOR)
+    private val notInputColor =
+        array.getColor(R.styleable.PasswordView_password_not_input_color, DEFAULT_NOT_INPUT_COLOR)
+    private val outlineColor =
+        array.getColor(R.styleable.PasswordView_password_outline_color, DEFAULT_OUTLINE_COLOR)
+    private val correctColor =
+        array.getColor(R.styleable.PasswordView_password_correct_color, DEFAULT_CORRECT_COLOR)
     private val incorrectColor =
         array.getColor(R.styleable.PasswordView_password_incorrect_color, DEFAULT_INCORRECT_COLOR)
+    private val textCompleteColor =
+        array.getColor(
+            R.styleable.PasswordView_password_complete_text_color,
+            DEFAULT_COMPLETE_TEXT_COLOR
+        )
+    private val textDefaultColor =
+        array.getColor(R.styleable.PasswordView_password_default_text_color, DEFAULT_TEXT_COLOR)
+    private val textMode =
+        array.getBoolean(R.styleable.PasswordView_password_text_mode, DEFAULT_TEXT_MODE)
+    private val textSize =
+        array.getDimensionPixelSize(R.styleable.PasswordView_password_text_size, DEFAULT_TEXT_SIZE)
     private val correctAnimationDuration =
-        array.getInteger(R.styleable.PasswordView_password_correct_duration, DEFAULT_CORRECT_ANIMATION_DURATION)
+        array.getInteger(
+            R.styleable.PasswordView_password_correct_duration,
+            DEFAULT_CORRECT_ANIMATION_DURATION
+        )
             .toLong()
     private val incorrectAnimationDuration =
-        array.getInteger(R.styleable.PasswordView_password_correct_duration, DEFAULT_INCORRECT_ANIMATION_DURATION)
+        array.getInteger(
+            R.styleable.PasswordView_password_correct_duration,
+            DEFAULT_INCORRECT_ANIMATION_DURATION
+        )
             .toLong()
     private val colorChangeAnimationDuration =
         array.getInteger(
@@ -84,11 +114,15 @@ class PasswordView @JvmOverloads constructor(
             R.styleable.PasswordView_password_input_and_remove_duration,
             DEFAULT_INPUT_AND_REMOVE_ANIMATION_DURATION
         ).toLong()
-    private val correctTop = array.getDimension(R.styleable.PasswordView_password_correct_top, DEFAULT_CORRECT_TOP)
+    private val correctTop =
+        array.getDimension(R.styleable.PasswordView_password_correct_top, DEFAULT_CORRECT_TOP)
     private val correctBottom =
         array.getDimension(R.styleable.PasswordView_password_correct_bottom, DEFAULT_CORRECT_BOTTOM)
     private val incorrectMaxWidth =
-        array.getDimension(R.styleable.PasswordView_password_incorrect_max_width, DEFAULT_INCORRECT_MAX_WIDTH)
+        array.getDimension(
+            R.styleable.PasswordView_password_incorrect_max_width,
+            DEFAULT_INCORRECT_MAX_WIDTH
+        )
     private val outlineStrokeWidth = array.getDimension(
         R.styleable.PasswordView_password_outline_stroke_width,
         DEFAULT_OUTLINE_STROKE_WIDTH
@@ -168,6 +202,9 @@ class PasswordView @JvmOverloads constructor(
                 setFillAndStrokeCircleColor(inputColor)
                 setInputAndRemoveAnimationDuration(inputAndRemoveAnimationDuration)
                 setRadius(radius)
+                setTextColor(textDefaultColor)
+                setTextMode(textMode)
+                setTextSize(textSize)
                 layoutParams = calcMargin(i, circleCount)
             }
             this.addView(circleView)
@@ -190,7 +227,7 @@ class PasswordView @JvmOverloads constructor(
 
         val halfMargin = betweenMargin / 2
         val halfIncorrectMaxWidth = (incorrectMaxWidth / 2).toInt()
-        val layoutParams = LinearLayout.LayoutParams(width, height).apply {
+        val layoutParams = LayoutParams(width, height).apply {
             topMargin = correctTop.toInt()
             bottomMargin = correctBottom.toInt()
         }
@@ -248,10 +285,22 @@ class PasswordView @JvmOverloads constructor(
                 circleViews[i].animateAndInvoke()
             }
         }
+        circleViews.forEachIndexed { index, circleView ->
+            if (index < newInput.length) {
+                circleView.text = newInput[index].toString()
+            } else {
+                circleView.text = null
+            }
+            if (newInput.length == circleViews.size) {
+                circleView.setTextColor(textCompleteColor)
+            } else {
+                circleView.setTextColor(textDefaultColor)
+            }
+        }
     }
 
     /**
-     * run correct animation
+     * 执行密码正确动画
      */
     fun correctAnimation() {
         correctAnimation(correctAnimationDuration)
@@ -259,7 +308,7 @@ class PasswordView @JvmOverloads constructor(
     }
 
     /**
-     * run incorrect animation
+     * 执行密码错误动画
      */
     fun incorrectAnimation() {
         incorrectAnimation(incorrectAnimationDuration)
@@ -267,7 +316,7 @@ class PasswordView @JvmOverloads constructor(
     }
 
     /**
-     * Empty the value of input and run reset animation
+     * 状态重置
      */
     fun reset() {
         input = ""
@@ -285,7 +334,7 @@ class PasswordView @JvmOverloads constructor(
     }
 
     /**
-     * append the value of input and run input animation
+     * 输入一个密码
      */
     fun appendInputText(text: String) {
         if (text.length + input.length > passwordCount) {
@@ -302,7 +351,7 @@ class PasswordView @JvmOverloads constructor(
     }
 
     /**
-     * remove last characters from input values and run not input animation
+     * 删除一个密码
      */
     fun removeInputText() {
         if (input.isEmpty()) {
@@ -314,6 +363,15 @@ class PasswordView @JvmOverloads constructor(
         }
 
         input = input.dropLast(1)
+    }
+
+    /**
+     * 设置密码是否可见
+     */
+    fun setTextMode(isTextMode: Boolean) {
+        circleViews.forEach {
+            it.setTextMode(isTextMode)
+        }
     }
 
     private fun fillAndStrokeColorChangeAnimation(duration: Long, color: Int) {

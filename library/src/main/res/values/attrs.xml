@@ -9,6 +9,10 @@
         <attr name="password_outline_color" format="color" />
         <attr name="password_correct_color" format="color" />
         <attr name="password_incorrect_color" format="color" />
+        <attr name="password_complete_text_color" format="color" />
+        <attr name="password_default_text_color" format="color" />
+        <attr name="password_text_mode" format="boolean" />
+        <attr name="password_text_size" format="dimension" />
         <attr name="password_correct_duration" format="integer" />
         <attr name="password_incorrect_duration" format="integer" />
         <attr name="password_color_change_duration" format="integer" />
