@@ -92,10 +92,17 @@ the y coordinate of the lowest circle
 `app:password_incorrect_max_width` - In animation when the password is
 incorrect, the swing width of the circle  
 
+`app:password_text_moder` - If text mode enable, password is visible for user.
+
+`app:password_text_size` - Set the text size in text mode.
+
+`app:password_default_text_color` - Set the text color for visible password.
+
+`app:password_complete_text_color` - Set the text color for visible password when input complete.
 
 ## License
 ```
-Copyright 2019 Keiju Matsumoto
+Copyright 2019 Keiju Matsumoto / Guojun Shen
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
